@@ -3,6 +3,7 @@
 ## Methods
 - `GET`
 - `POST`
+- `DELETE`
 
 ### `GET`
 Body: `None`
@@ -20,5 +21,10 @@ Key | Type | Optional
 `name` | String | no
 `online` | Boolean | no
 `type` | String | yes
+
+Return: `None`
+
+### `DELETE`
+Body: `None`
 
 Return: `None`

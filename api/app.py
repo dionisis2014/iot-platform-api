@@ -98,7 +98,7 @@ def users():
 		else:
 			return {"error": "server error"}
 
-@app.route("/api/users/<user_name>", methods=['GET', 'POST'])
+@app.route("/api/users/<user_name>", methods=['GET', 'POST', 'DELETE'])
 def user(user_name):
 	with Session(engine) as session:
 		user = getUserName(session, user_name)
@@ -114,6 +114,16 @@ def user(user_name):
 			for sensor in sensors:
 				data['sensors'].append(sensor.id)
 			return data
+		elif request.method == 'DELETE':
+			session.delete(user)
+			try:
+				session.commit()
+				return {"error": None}
+			except Exception as e:
+				session.rollback()
+				session.flush()
+				return {"error": "failed to delete sensor"}
+				
 		elif request.method == 'POST':
 			sensor = Sensor(user_id=user.id)
 			try:
