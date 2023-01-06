@@ -74,7 +74,10 @@ def users():
 				users_list.append(user.name)
 			return {"users": users_list}
 		elif request.method == 'POST':
-			data = request.get_json()
+			try:
+				data = request.get_json()
+			except Exception as e:
+				return {"error": "no body provided"}
 			if 'name' in data:
 				if not isinstance(data['name'], str):
 					return {"error": "\'name\' is not a string"}
@@ -104,6 +107,7 @@ def user(user_name):
 
 		if request.method == 'GET':
 			data = user.toDict()
+			data.pop('id', None)
 			data['sensors'] = []
 			statement = select(Sensor).where(Sensor.user_id.__eq__(user.id))
 			sensors = session.scalars(statement)
@@ -112,7 +116,10 @@ def user(user_name):
 			return data
 		elif request.method == 'POST':
 			sensor = Sensor(user_id=user.id)
-			data = request.get_json()
+			try:
+				data = request.get_json()
+			except Exception as e:
+				return {"error": "no body provided"}
 			if 'name' in data:
 				if not isinstance(data['name'], str):
 					return {"error": "\'name\' is not a string"}
@@ -156,7 +163,9 @@ def sensor(user_name, sensor_id):
 		if sensor.user_id != user.id:
 			return {"error": "sensor not found for user"}
 		if request.method == 'GET':
-			return sensor.toDict()
+			sensor = sensor.toDict()
+			sensor.pop('user_id', None)
+			return sensor
 		elif request.method == 'DELETE':
 			session.delete(sensor)
 			try:
@@ -167,7 +176,10 @@ def sensor(user_name, sensor_id):
 				session.flush()
 				return {"error": "failed to delete sensor"}
 		elif request.method == 'PATCH':
-			data = request.get_json()
+			try:
+				data = request.get_json()
+			except Exception as e:
+				return {"error": "no body provided"}
 			if 'name' in data:
 				if not isinstance(data['name'], str):
 					return {"error": "\'name\' is not a string"}
@@ -195,3 +207,6 @@ def sensor(user_name, sensor_id):
 				return {"error": "failed to edit sensor"}
 		else:
 			return {"error": "server error"}
+
+if __name__ == '__main__':
+	app.run(debug=False, host='0.0.0.0')
